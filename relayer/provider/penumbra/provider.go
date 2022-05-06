@@ -10,8 +10,6 @@ import (
 	"time"
 
 	"github.com/avast/retry-go/v4"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -212,23 +210,6 @@ func (cc *PenumbraProvider) Timeout() string {
 	return cc.PCfg.Timeout
 }
 
-func (cc *PenumbraProvider) AddKey(name string, coinType uint32) (*provider.KeyOutput, error) {
-	// The lens client returns an equivalent KeyOutput type,
-	// but that type is declared in the lens module,
-	// and relayer's KeyProvider interface references the relayer KeyOutput.
-	//
-	// Translate the lens KeyOutput to a relayer KeyOutput here to satisfy the interface.
-
-	ko, err := cc.ChainClient.AddKey(name, coinType)
-	if err != nil {
-		return nil, err
-	}
-	return &provider.KeyOutput{
-		Mnemonic: ko.Mnemonic,
-		Address:  ko.Address,
-	}, nil
-}
-
 // Address returns the chains configured address as a string
 func (cc *PenumbraProvider) Address() (string, error) {
 	var (
@@ -272,7 +253,7 @@ func (cc *PenumbraProvider) CreateClient(
 		acc string
 		err error
 	)
-	if err := dstHeader.ValidateBasic(); err != nil {
+	if err = dstHeader.ValidateBasic(); err != nil {
 		return nil, err
 	}
 
@@ -1688,6 +1669,8 @@ func (cc *PenumbraProvider) SendMessage(
 	return cc.SendMessages(ctx, []provider.RelayerMessage{msg})
 }
 
+// takes a RelayerMessage, converts it to a PenumbraMessage, and wraps it into
+// Penumbra's equivalent of the "message" abstraction, an Action.
 func msgToPenumbraAction(msg provider.RelayerMessage) (*penumbra_types.Action, error) {
 	penMsg, ok := msg.(PenumbraMessage)
 	if !ok {
@@ -1727,13 +1710,12 @@ func (cc *PenumbraProvider) SendMessages(
 	ctx context.Context,
 	msgs []provider.RelayerMessage,
 ) (*provider.RelayerTxResponse, bool, error) {
-	var (
-		txb     client.TxBuilder
-		txBytes []byte
-		res     *sdk.TxResponse
-	)
+	var res *sdk.TxResponse
 
-	// TODO: fee estimation
+	// TODO: fee estimation, fee payments
+	// NOTE: we do not actually need to sign this tx currently, since there
+	// are no fees required on the testnet. future versions of penumbra
+	// will have a signing protocol for this.
 
 	// build tx with one IBCAction per msg in msgs
 	txBody := penumbra_types.TransactionBody{}
@@ -1745,30 +1727,29 @@ func (cc *PenumbraProvider) SendMessages(
 		txBody.Actions = append(txBody.Actions, action)
 	}
 
-	// TODO: sign tx, encode signed tx
+	tx := &penumbra_types.Transaction{
+		Body:       &txBody,
+		BindingSig: nil,
+	}
+
+	txBytes, err := proto.Marshal(tx)
+	if err != nil {
+		return nil, false, err
+	}
 
 	res, err = cc.BroadcastTx(ctx, txBytes)
 	if err != nil || res == nil {
 		return nil, false, err
 	}
 
-	// Parse events and build a map where the key is event.Type+"."+attribute.Key
-	events := make(map[string]string, 1)
-	for _, logs := range res.Logs {
-		for _, ev := range logs.Events {
-			for _, attr := range ev.Attributes {
-				key := ev.Type + "." + attr.Key
-				events[key] = attr.Value
-			}
-		}
-	}
+	// TODO: event parsing (penumbra currently does not have events)
 
 	rlyRes := &provider.RelayerTxResponse{
 		Height: res.Height,
 		TxHash: res.TxHash,
 		Code:   res.Code,
 		Data:   res.Data,
-		Events: events,
+		Events: make(map[string]string),
 	}
 
 	// transaction was executed, log the success or failure using the tx response code
