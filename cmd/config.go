@@ -34,6 +34,7 @@ import (
 	"github.com/cosmos/relayer/v2/relayer"
 	"github.com/cosmos/relayer/v2/relayer/provider"
 	"github.com/cosmos/relayer/v2/relayer/provider/cosmos"
+	"github.com/cosmos/relayer/v2/relayer/provider/penumbra"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
@@ -307,6 +308,7 @@ func ConfigToWrapper(config *Config) *ConfigOutputWrapper {
 	cfgw := &ConfigOutputWrapper{Global: config.Global, Paths: config.Paths}
 	var providers []*ProviderConfigWrapper
 	for _, chain := range config.Chains {
+		fmt.Println("FOO")
 		pcfgw := &ProviderConfigWrapper{
 			Type:  chain.ChainProvider.Type(),
 			Value: chain.ChainProvider.ProviderConfig(),
@@ -356,7 +358,8 @@ type ProviderConfigYAMLWrapper struct {
 // NOTE: Add new ProviderConfig types in the map here with the key set equal to the type of ChainProvider (e.g. cosmos, substrate, etc.)
 func (pcw *ProviderConfigWrapper) UnmarshalJSON(data []byte) error {
 	customTypes := map[string]reflect.Type{
-		"cosmos": reflect.TypeOf(cosmos.CosmosProviderConfig{}),
+		"cosmos":   reflect.TypeOf(cosmos.CosmosProviderConfig{}),
+		"penumbra": reflect.TypeOf(penumbra.PenumbraProviderConfig{}),
 	}
 	val, err := UnmarshalJSONProviderConfig(data, customTypes)
 	if err != nil {
@@ -409,6 +412,8 @@ func (iw *ProviderConfigYAMLWrapper) UnmarshalYAML(n *yaml.Node) error {
 	switch iw.Type {
 	case "cosmos":
 		iw.Value = new(cosmos.CosmosProviderConfig)
+	case "penumbra":
+		iw.Value = new(penumbra.PenumbraProviderConfig)
 	default:
 		return fmt.Errorf("%s is an invalid chain type, check your config file", iw.Type)
 	}

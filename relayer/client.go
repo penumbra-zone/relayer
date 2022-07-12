@@ -139,12 +139,15 @@ func CreateClient(ctx context.Context, src, dst *Chain, srcUpdateHeader, dstUpda
 				zap.String("dst_chain_id", dst.ChainID()),
 			)
 
+			fmt.Println("creating client")
 			createMsg, err := src.ChainProvider.CreateClient(clientState, dstUpdateHeader)
 			if err != nil {
+				fmt.Println(err)
 				return modified, fmt.Errorf("failed to compose CreateClient msg for chain{%s}: %w", src.ChainID(), err)
 			}
 
 			msgs := []provider.RelayerMessage{createMsg}
+			fmt.Println(msgs)
 
 			// if a matching client does not exist, create one
 			if err = retry.Do(func() error {

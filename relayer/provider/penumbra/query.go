@@ -2,18 +2,24 @@ package penumbra
 
 import (
 	"context"
+	"fmt"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	clienttypes "github.com/cosmos/ibc-go/v3/modules/core/02-client/types"
 	conntypes "github.com/cosmos/ibc-go/v3/modules/core/03-connection/types"
 	chantypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
+	commitmenttypes "github.com/cosmos/ibc-go/v3/modules/core/23-commitment/types"
 	ibcexported "github.com/cosmos/ibc-go/v3/modules/core/exported"
 	ibctmtypes "github.com/cosmos/ibc-go/v3/modules/light-clients/07-tendermint/types"
 	tmclient "github.com/cosmos/ibc-go/v3/modules/light-clients/07-tendermint/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 // QueryTx takes a transaction hash and returns the transaction
@@ -41,7 +47,7 @@ func (cc *PenumbraProvider) QueryBalanceWithAddress(ctx context.Context, address
 
 // QueryUnbondingPeriod returns the unbonding period of the chain
 func (cc *PenumbraProvider) QueryUnbondingPeriod(ctx context.Context) (time.Duration, error) {
-	return 0, nil
+	return time.Hour * 2, nil
 }
 
 // QueryTendermintProof performs an ABCI query with the given key and returns
@@ -54,18 +60,95 @@ func (cc *PenumbraProvider) QueryUnbondingPeriod(ctx context.Context) (time.Dura
 // at the lastest state available.
 // Issue: https://github.com/cosmos/cosmos-sdk/issues/6567
 func (cc *PenumbraProvider) QueryTendermintProof(ctx context.Context, height int64, key []byte) ([]byte, []byte, clienttypes.Height, error) {
-	return nil, nil, clienttypes.Height{}, nil
+	// ABCI queries at heights 1, 2 or less than or equal to 0 are not supported.
+	// Base app does not support queries for height less than or equal to 1.
+	// Therefore, a query at height 2 would be equivalent to a query at height 3.
+	// A height of 0 will query with the lastest state.
+	if height != 0 && height <= 2 {
+		return nil, nil, clienttypes.Height{}, fmt.Errorf("proof queries at height <= 2 are not supported")
+	}
+
+	// Use the IAVL height if a valid tendermint height is passed in.
+	// A height of 0 will query with the latest state.
+	if height != 0 {
+		height--
+	}
+
+	req := abci.RequestQuery{
+		Path:   "state/key",
+		Height: height,
+		Data:   key,
+		Prove:  true,
+	}
+
+	res, err := cc.QueryABCI(ctx, req)
+	if err != nil {
+		return nil, nil, clienttypes.Height{}, err
+	}
+
+	merkleProof, err := commitmenttypes.ConvertProofs(res.ProofOps)
+	if err != nil {
+		return nil, nil, clienttypes.Height{}, err
+	}
+
+	cdc := codec.NewProtoCodec(cc.Codec.InterfaceRegistry)
+
+	proofBz, err := cdc.Marshal(&merkleProof)
+	if err != nil {
+		return nil, nil, clienttypes.Height{}, err
+	}
+
+	revision := clienttypes.ParseChainID(cc.PCfg.ChainID)
+	return res.Value, proofBz, clienttypes.NewHeight(revision, uint64(res.Height)+1), nil
 }
 
 // QueryClientStateResponse retrieves the latest consensus state for a client in state at a given height
 func (cc *PenumbraProvider) QueryClientStateResponse(ctx context.Context, height int64, srcClientId string) (*clienttypes.QueryClientStateResponse, error) {
-	return &clienttypes.QueryClientStateResponse{}, nil
+	key := []byte(fmt.Sprintf("penumbra-ibc-commitment/clients/%s/clientState", srcClientId))
+
+	value, proofBz, proofHeight, err := cc.QueryTendermintProof(ctx, height, key)
+	if err != nil {
+		return nil, err
+	}
+
+	// check if client exists
+	if len(value) == 0 {
+		return nil, sdkerrors.Wrap(clienttypes.ErrClientNotFound, srcClientId)
+	}
+
+	cdc := codec.NewProtoCodec(cc.Codec.InterfaceRegistry)
+
+	clientState, err := clienttypes.UnmarshalClientState(cdc, value)
+	if err != nil {
+		return nil, err
+	}
+
+	anyClientState, err := clienttypes.PackClientState(clientState)
+	if err != nil {
+		return nil, err
+	}
+
+	return &clienttypes.QueryClientStateResponse{
+		ClientState: anyClientState,
+		Proof:       proofBz,
+		ProofHeight: proofHeight,
+	}, nil
 }
 
 // QueryClientState retrieves the latest consensus state for a client in state at a given height
 // and unpacks it to exported client state interface
 func (cc *PenumbraProvider) QueryClientState(ctx context.Context, height int64, clientid string) (ibcexported.ClientState, error) {
-	return nil, nil
+	clientStateRes, err := cc.QueryClientStateResponse(ctx, height, clientid)
+	if err != nil {
+		return nil, err
+	}
+
+	clientStateExported, err := clienttypes.UnpackClientState(clientStateRes.ClientState)
+	if err != nil {
+		return nil, err
+	}
+
+	return clientStateExported, nil
 }
 
 // QueryClientConsensusState retrieves the latest consensus state for a client in state at a given height
@@ -198,12 +281,46 @@ func (cc *PenumbraProvider) QueryPacketReceipt(ctx context.Context, height int64
 }
 
 func (cc *PenumbraProvider) QueryLatestHeight(ctx context.Context) (int64, error) {
-	return 0, nil
+	stat, err := cc.RPCClient.Status(ctx)
+	if err != nil {
+		return -1, err
+	} else if stat.SyncInfo.CatchingUp {
+		return -1, fmt.Errorf("node at %s running chain %s not caught up", cc.PCfg.RPCAddr, cc.PCfg.ChainID)
+	}
+	return stat.SyncInfo.LatestBlockHeight, nil
 }
 
 // QueryHeaderAtHeight returns the header at a given height
 func (cc *PenumbraProvider) QueryHeaderAtHeight(ctx context.Context, height int64) (ibcexported.Header, error) {
-	return nil, nil
+	var (
+		page    = 1
+		perPage = 100000
+	)
+	if height <= 0 {
+		return nil, fmt.Errorf("must pass in valid height, %d not valid", height)
+	}
+
+	res, err := cc.RPCClient.Commit(ctx, &height)
+	if err != nil {
+		return nil, err
+	}
+
+	val, err := cc.RPCClient.Validators(ctx, &height, &page, &perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	protoVal, err := tmtypes.NewValidatorSet(val.Validators).ToProto()
+	if err != nil {
+		return nil, err
+	}
+
+	return &tmclient.Header{
+		// NOTE: This is not a SignedHeader
+		// We are missing a light.Commit type here
+		SignedHeader: res.SignedHeader.ToProto(),
+		ValidatorSet: protoVal,
+	}, nil
 }
 
 // QueryDenomTrace takes a denom from IBC and queries the information about it

@@ -3,7 +3,6 @@ package penumbra
 import (
 	"context"
 	"fmt"
-	"math"
 	"os"
 	"reflect"
 	"strconv"
@@ -25,6 +24,8 @@ import (
 	ibcexported "github.com/cosmos/ibc-go/v3/modules/core/exported"
 	tmclient "github.com/cosmos/ibc-go/v3/modules/light-clients/07-tendermint/types"
 	"github.com/cosmos/relayer/v2/relayer/provider"
+	googleproto "google.golang.org/protobuf/proto"
+
 	"github.com/gogo/protobuf/proto"
 	penumbra_types "github.com/penumbra-zone/penumbra/proto/go-proto"
 	"github.com/pkg/errors"
@@ -101,7 +102,10 @@ func (cm PenumbraMessage) Type() string {
 }
 
 func (cm PenumbraMessage) MsgBytes() ([]byte, error) {
-	return proto.Marshal(cm.Msg)
+	fmt.Println("HERE1")
+	m, err := proto.Marshal(cm.Msg)
+	fmt.Println("HERE2")
+	return m, err
 }
 
 // MarshalLogObject is used to encode cm to a zap logger with the zap.Object field type.
@@ -199,7 +203,7 @@ func (cc *PenumbraProvider) ChainId() string {
 }
 
 func (cc *PenumbraProvider) Type() string {
-	return "cosmos"
+	return "penumbra"
 }
 
 func (cc *PenumbraProvider) Key() string {
@@ -212,6 +216,9 @@ func (cc *PenumbraProvider) Timeout() string {
 
 // Address returns the chains configured address as a string
 func (cc *PenumbraProvider) Address() (string, error) {
+	// TODO: relayer key management
+	return "penumbrav1t1dhwkaqetyfunt8w4qqq8madtzj39svuav7h2xkyr8v7af7ucr0k3msztvstrdcydvt56hc9fc9qz4y90wfqp6xwu2vljxhdx0k285c927e2uvypynjcgafexhlexk7hz4aadms", nil
+
 	var (
 		err  error
 		info keyring.Info
@@ -229,19 +236,8 @@ func (cc *PenumbraProvider) Address() (string, error) {
 }
 
 func (cc *PenumbraProvider) TrustingPeriod(ctx context.Context) (time.Duration, error) {
-	res, err := cc.QueryStakingParams(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	integer, _ := math.Modf(res.UnbondingTime.Hours() * 0.85)
-	trustingStr := fmt.Sprintf("%vh", integer)
-	tp, err := time.ParseDuration(trustingStr)
-	if err != nil {
-		return 0, nil
-	}
-
-	return tp, nil
+	// TODO
+	return time.Hour, nil
 }
 
 // CreateClient creates an sdk.Msg to update the client on src with consensus state from dst
@@ -280,9 +276,6 @@ func (cc *PenumbraProvider) CreateClient(
 		ClientState:    anyClientState,
 		ConsensusState: anyConsensusState,
 		Signer:         acc,
-	}
-	if err != nil {
-		return nil, err
 	}
 
 	return NewPenumbraMessage(msg), nil
@@ -1666,6 +1659,7 @@ func (cc *PenumbraProvider) SendMessage(
 	ctx context.Context,
 	msg provider.RelayerMessage,
 ) (*provider.RelayerTxResponse, bool, error) {
+	fmt.Println("HERE3")
 	return cc.SendMessages(ctx, []provider.RelayerMessage{msg})
 }
 
@@ -1679,6 +1673,7 @@ func msgToPenumbraAction(msg provider.RelayerMessage) (*penumbra_types.Action, e
 
 	switch penMsg.Msg.(type) {
 	case *clienttypes.MsgCreateClient:
+		fmt.Println("CREATE CLIENT")
 		return &penumbra_types.Action{
 			Action: &penumbra_types.Action_IbcAction{IbcAction: &penumbra_types.IBCAction{
 				Action: &penumbra_types.IBCAction_CreateClient{
@@ -1710,6 +1705,7 @@ func (cc *PenumbraProvider) SendMessages(
 	ctx context.Context,
 	msgs []provider.RelayerMessage,
 ) (*provider.RelayerTxResponse, bool, error) {
+	fmt.Println("SEND MESSAGES")
 	var res *sdk.TxResponse
 
 	// TODO: fee estimation, fee payments
@@ -1718,25 +1714,35 @@ func (cc *PenumbraProvider) SendMessages(
 	// will have a signing protocol for this.
 
 	// build tx with one IBCAction per msg in msgs
-	txBody := penumbra_types.TransactionBody{}
-	for _, msg := range msgs {
+	txBody := penumbra_types.TransactionBody{
+		Actions: make([]*penumbra_types.Action, len(msgs)),
+		Fee:     &penumbra_types.Fee{Amount: 0},
+	}
+	for i, msg := range msgs {
 		action, err := msgToPenumbraAction(msg)
 		if err != nil {
 			return nil, false, err
 		}
-		txBody.Actions = append(txBody.Actions, action)
+		txBody.Actions[i] = action
 	}
 
 	tx := &penumbra_types.Transaction{
 		Body:       &txBody,
-		BindingSig: nil,
+		BindingSig: make([]byte, 64), // use the Cool Signature
+		Anchor:     &penumbra_types.MerkleRoot{Inner: make([]byte, 32)},
 	}
 
-	txBytes, err := proto.Marshal(tx)
+	fmt.Println(tx)
+
+	fmt.Println("BEFORE")
+	txBytes, err := googleproto.Marshal(tx)
 	if err != nil {
 		return nil, false, err
 	}
+	fmt.Println("AFTER")
+	fmt.Printf("%x\n", txBytes)
 
+	fmt.Println("BROADCASTING TXN")
 	res, err = cc.BroadcastTx(ctx, txBytes)
 	if err != nil || res == nil {
 		return nil, false, err

@@ -783,6 +783,12 @@ github.com/pelletier/go-toml v1.9.4 h1:tjENF6MfZAg8e4ZmZTeWaWiT2vXtsoO6+iuOjFhEC
 github.com/pelletier/go-toml v1.9.4/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/penumbra-zone/penumbra v0.0.0-20220504225108-ef71d50d2cb3 h1:G+JqxG8JXJ769mUqXeukITdDT8FDitwnCMQfg+MvmGQ=
 github.com/penumbra-zone/penumbra v0.0.0-20220504225108-ef71d50d2cb3/go.mod h1:iRgU0bZrrB/25WqVCtNdGfsPa5mrkya7+AxKUm0Tivo=
+github.com/penumbra-zone/penumbra v0.0.0-20220601032822-a7125998c41c h1:/UZzBbINoriytdwktfjAjN+aetZiuv/1soFI6p8I4eY=
+github.com/penumbra-zone/penumbra v0.0.0-20220601032822-a7125998c41c/go.mod h1:iRgU0bZrrB/25WqVCtNdGfsPa5mrkya7+AxKUm0Tivo=
+github.com/penumbra-zone/penumbra v0.0.0-20220601060204-fe0897a0e387 h1:mHJgfBjgnUph6/iMkr893B1IMrF3nlHgp4qVFNKQQ8g=
+github.com/penumbra-zone/penumbra v0.0.0-20220601060204-fe0897a0e387/go.mod h1:iRgU0bZrrB/25WqVCtNdGfsPa5mrkya7+AxKUm0Tivo=
+github.com/penumbra-zone/penumbra v0.0.0-20220601060754-26ed6c36cc90 h1:dc/DpfyrLdYcrfdGil5l083e9f8uBLVF6hy5pG5BxGk=
+github.com/penumbra-zone/penumbra v0.0.0-20220601060754-26ed6c36cc90/go.mod h1:iRgU0bZrrB/25WqVCtNdGfsPa5mrkya7+AxKUm0Tivo=
 github.com/performancecopilot/speed v3.0.0+incompatible/go.mod h1:/CLtqpZ5gBg1M9iaPbIdPPGyKcA8hKdoy6hAWba7Yac=
 github.com/peterh/liner v1.1.1-0.20190123174540-a2c9a5303de7/go.mod h1:CRroGNssyjTd/qIG2FyxByd2S8JEAZXBl4qUrZf8GS0=
 github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 h1:q2e307iGHPdTGp0hoxKjt1H5pDo6utceo3dQVK3I5XQ=

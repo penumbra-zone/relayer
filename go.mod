@@ -116,7 +116,7 @@ require (
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/opencontainers/runc v1.0.3 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
-	github.com/penumbra-zone/penumbra v0.0.0-20220504225108-ef71d50d2cb3 // indirect
+	github.com/penumbra-zone/penumbra v0.0.0-20220601060754-26ed6c36cc90 // indirect
 	github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.11.0 // indirect
