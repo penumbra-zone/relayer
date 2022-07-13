@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	commitmenttypes "github.com/cosmos/ibc-go/v5/modules/core/23-commitment/types"
@@ -152,6 +153,11 @@ func (cc *CosmosProvider) Timeout() string {
 	return cc.PCfg.Timeout
 }
 
+func (cc *CosmosProvider) CommitmentPrefix() commitmenttypes.MerklePrefix {
+	fmt.Println("CALLED COMMITMENT PREFIX", defaultChainPrefix)
+	return defaultChainPrefix
+}
+
 func (cc *CosmosProvider) AddKey(name string, coinType uint32) (*provider.KeyOutput, error) {
 	// The lens client returns an equivalent KeyOutput type,
 	// but that type is declared in the lens module,
@@ -195,6 +201,7 @@ func (cc *CosmosProvider) Address() (string, error) {
 }
 
 func (cc *CosmosProvider) TrustingPeriod(ctx context.Context) (time.Duration, error) {
+	fmt.Println("getting COSMOS trusting period")
 	res, err := cc.QueryStakingParams(ctx)
 	if err != nil {
 		return 0, err
