@@ -342,7 +342,6 @@ type ChainProvider interface {
 	ChainId() string
 	Type() string
 	ProviderConfig() ProviderConfig
-	CommitmentPrefix() commitmenttypes.MerklePrefix
 	Key() string
 	Address() (string, error)
 	Timeout() string

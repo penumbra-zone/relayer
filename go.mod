@@ -3,6 +3,7 @@ module github.com/cosmos/relayer/v2
 go 1.18
 
 require (
+	buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go v1.28.1-20230113211042-4070f18acf80.4
 	github.com/avast/retry-go/v4 v4.3.1
 	github.com/confio/ics23/go v0.7.0
 	github.com/cosmos/cosmos-sdk v0.46.6
@@ -12,7 +13,6 @@ require (
 	github.com/google/go-github/v43 v43.0.0
 	github.com/jsternberg/zap-logfmt v1.3.0
 	github.com/juju/fslock v0.0.0-20160525022230-4d5c94c67b4b
-	github.com/penumbra-zone/penumbra v0.0.0-20221214203025-dff73965a1fb
 	github.com/prometheus/client_golang v1.12.2
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
@@ -28,8 +28,7 @@ require (
 )
 
 require (
-	buf.build/gen/go/penumbra-zone/penumbra/bufbuild/connect-go v1.4.0-20221214201520-0430fc95e33a.1 // indirect
-	buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go v1.28.1-20221214201520-0430fc95e33a.4 // indirect
+	buf.build/gen/go/penumbra-zone/ibc-go-vendor/protocolbuffers/go v1.28.1-20221217204905-341b9507648a.4 // indirect
 	cloud.google.com/go v0.104.0 // indirect
 	cloud.google.com/go/compute v1.12.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.1 // indirect
@@ -60,7 +59,6 @@ require (
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gorocksdb v1.2.0 // indirect
 	github.com/cosmos/iavl v0.19.4 // indirect
-	github.com/cosmos/ibc-go/v3 v3.1.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.11.1 // indirect
 	github.com/cosmos/ledger-go v0.9.2 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect

@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	commitmenttypes "github.com/cosmos/ibc-go/v5/modules/core/23-commitment/types"
@@ -151,11 +150,6 @@ func (cc *CosmosProvider) Key() string {
 
 func (cc *CosmosProvider) Timeout() string {
 	return cc.PCfg.Timeout
-}
-
-func (cc *CosmosProvider) CommitmentPrefix() commitmenttypes.MerklePrefix {
-	fmt.Println("CALLED COMMITMENT PREFIX", defaultChainPrefix)
-	return defaultChainPrefix
 }
 
 func (cc *CosmosProvider) AddKey(name string, coinType uint32) (*provider.KeyOutput, error) {

@@ -1,9 +1,11 @@
 buf.build/gen/go/penumbra-zone/ibc-go-vendor/protocolbuffers/go v1.28.1-20221207234335-378df3992232.4 h1:iYod++hT4hjBR8ZhQBfAHvBi1auhQJewryeNojjDClA=
 buf.build/gen/go/penumbra-zone/ibc-go-vendor/protocolbuffers/go v1.28.1-20221207234335-378df3992232.4/go.mod h1:DgTZ+2CEkeonO4MjNqdHVoG746QZpyoGnSWDk+JOdcE=
-buf.build/gen/go/penumbra-zone/penumbra/bufbuild/connect-go v1.4.0-20221214201520-0430fc95e33a.1 h1:4kkZ7RHy9pm/NojdgyTLM22mWAch5Ui8mF5+VcGLtCA=
-buf.build/gen/go/penumbra-zone/penumbra/bufbuild/connect-go v1.4.0-20221214201520-0430fc95e33a.1/go.mod h1:ezA8MPQyz8GBRPEbUSGZWU4GRg59O/edPzcivTjhBhI=
+buf.build/gen/go/penumbra-zone/ibc-go-vendor/protocolbuffers/go v1.28.1-20221217204905-341b9507648a.4 h1:Vb6Hjenw0GF5/W7XDCISaooNZ1/tsTCX9X3IipBLHYs=
+buf.build/gen/go/penumbra-zone/ibc-go-vendor/protocolbuffers/go v1.28.1-20221217204905-341b9507648a.4/go.mod h1:DgTZ+2CEkeonO4MjNqdHVoG746QZpyoGnSWDk+JOdcE=
 buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go v1.28.1-20221214201520-0430fc95e33a.4 h1:eGrcMRkwU4+b2nwTGlRd/cE/8zhik7BrmbenoY0/a/M=
 buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go v1.28.1-20221214201520-0430fc95e33a.4/go.mod h1:n0TDugb4HZmE8GyCxef1oD83nztV0KRh+2NRN0cH7N4=
+buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go v1.28.1-20230113211042-4070f18acf80.4 h1:idzF5irVlT2XzH6WwPbdoPsGMg/MOPd2Tn4se+5I5JM=
+buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go v1.28.1-20230113211042-4070f18acf80.4/go.mod h1:aergeJMb6oxIUCIPI8v5FXk9pQ4LeLbgm3vdZ0G8964=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=
@@ -187,8 +189,6 @@ github.com/cosmos/gorocksdb v1.2.0 h1:d0l3jJG8M4hBouIZq0mDUHZ+zjOx044J3nGRskwTb4
 github.com/cosmos/gorocksdb v1.2.0/go.mod h1:aaKvKItm514hKfNJpUJXnnOWeBnk2GL4+Qw9NHizILw=
 github.com/cosmos/iavl v0.19.4 h1:t82sN+Y0WeqxDLJRSpNd8YFX5URIrT+p8n6oJbJ2Dok=
 github.com/cosmos/iavl v0.19.4/go.mod h1:X9PKD3J0iFxdmgNLa7b2LYWdsGd90ToV5cAONApkEPw=
-github.com/cosmos/ibc-go/v3 v3.1.0 h1:aVPqkrGBluz6t9+d/sLZIG/zQ9O1KJzVeR4UlL/IFTQ=
-github.com/cosmos/ibc-go/v3 v3.1.0/go.mod h1:DbOlOa4yKumaHGKApKkJN90L88PCjSD9ZBdAfL9tT40=
 github.com/cosmos/ibc-go/v5 v5.1.0 h1:m1NHXFkwwvNeJegZqtyox1WLinh+PMy4ivU/Cs9KjeA=
 github.com/cosmos/ibc-go/v5 v5.1.0/go.mod h1:H6sV0/CkNRDtvSrhbsIgiog1WnSwhguGfg8x34MOVEk=
 github.com/cosmos/ledger-cosmos-go v0.11.1 h1:9JIYsGnXP613pb2vPjFeMMjBI5lEDsEaF6oYorTy6J4=
@@ -526,8 +526,6 @@ github.com/pelletier/go-toml v1.9.5 h1:4yBQzkHv+7BHq2PQUZF3Mx0IYxG7LsP222s7Agd3v
 github.com/pelletier/go-toml v1.9.5/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pelletier/go-toml/v2 v2.0.5 h1:ipoSadvV8oGUjnUbMub59IDPPwfxF694nG/jwbMiyQg=
 github.com/pelletier/go-toml/v2 v2.0.5/go.mod h1:OMHamSCAODeSsVrwwvcJOaoN0LIUIaFVNZzmWyNfXas=
-github.com/penumbra-zone/penumbra v0.0.0-20221214203025-dff73965a1fb h1:wGMpPxaIEPqc/KhXaJRSiVDYoByyBwaOBeXzisPHTzA=
-github.com/penumbra-zone/penumbra v0.0.0-20221214203025-dff73965a1fb/go.mod h1:iRgU0bZrrB/25WqVCtNdGfsPa5mrkya7+AxKUm0Tivo=
 github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 h1:q2e307iGHPdTGp0hoxKjt1H5pDo6utceo3dQVK3I5XQ=
 github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5/go.mod h1:jvVRKCrJTQWu0XVbaOlby/2lO20uSCHEMzzplHXte1o=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
