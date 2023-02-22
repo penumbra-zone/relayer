@@ -3,7 +3,7 @@ module github.com/cosmos/relayer/v2
 go 1.18
 
 require (
-	buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go v1.28.1-20230113211042-4070f18acf80.4
+	buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go v1.28.1-20230221212815-c7c2bc981dd1.4
 	github.com/avast/retry-go/v4 v4.3.1
 	github.com/confio/ics23/go v0.7.0
 	github.com/cosmos/cosmos-sdk v0.46.6
@@ -22,18 +22,21 @@ require (
 	go.uber.org/multierr v1.8.0
 	go.uber.org/zap v1.23.0
 	golang.org/x/sync v0.1.0
-	golang.org/x/term v0.1.0
+	golang.org/x/term v0.5.0
 	google.golang.org/protobuf v1.28.2-0.20220831092852-f930b1dc76e8
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	buf.build/gen/go/penumbra-zone/ibc-go-vendor/protocolbuffers/go v1.28.1-20221217204905-341b9507648a.4 // indirect
-	cloud.google.com/go v0.104.0 // indirect
-	cloud.google.com/go/compute v1.12.1 // indirect
-	cloud.google.com/go/compute/metadata v0.2.1 // indirect
-	cloud.google.com/go/iam v0.4.0 // indirect
-	cloud.google.com/go/storage v1.23.0 // indirect
+	buf.build/gen/go/cosmos/cosmos-proto/protocolbuffers/go v1.28.1-20211202220400-1935555c206d.4 // indirect
+	buf.build/gen/go/cosmos/cosmos-sdk/protocolbuffers/go v1.28.1-20230222174225-79b0b35b0aaf.4 // indirect
+	buf.build/gen/go/cosmos/gogo-proto/protocolbuffers/go v1.28.1-20221020125208-34d970b699f8.4 // indirect
+	buf.build/gen/go/cosmos/ibc/protocolbuffers/go v1.28.1-20230221084850-d397bc4bfd09.4 // indirect
+	cloud.google.com/go v0.107.0 // indirect
+	cloud.google.com/go/compute v1.18.0 // indirect
+	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+	cloud.google.com/go/iam v0.11.0 // indirect
+	cloud.google.com/go/storage v1.27.0 // indirect
 	cosmossdk.io/errors v1.0.0-beta.7 // indirect
 	cosmossdk.io/math v1.0.0-beta.3 // indirect
 	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
@@ -52,7 +55,7 @@ require (
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1 // indirect
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/cosmos/btcutil v1.0.4 // indirect
 	github.com/cosmos/cosmos-proto v1.0.0-alpha7 // indirect
@@ -83,9 +86,8 @@ require (
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
-	github.com/googleapis/gax-go/v2 v2.6.0 // indirect
-	github.com/googleapis/go-type-adapters v1.0.0 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
+	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
@@ -140,19 +142,19 @@ require (
 	github.com/ulikunitz/xz v0.5.8 // indirect
 	github.com/zondax/hid v0.9.1-0.20220302062450-5552068d2266 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
-	go.opencensus.io v0.23.0 // indirect
+	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
-	golang.org/x/net v0.1.0 // indirect
-	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
-	golang.org/x/sys v0.1.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/oauth2 v0.5.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
-	google.golang.org/api v0.102.0 // indirect
+	google.golang.org/api v0.110.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20221024183307-1bc688fe9f3e // indirect
-	google.golang.org/grpc v1.50.1 // indirect
+	google.golang.org/genproto v0.0.0-20230222225845-10f96fb3dbec // indirect
+	google.golang.org/grpc v1.53.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
