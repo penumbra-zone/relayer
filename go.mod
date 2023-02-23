@@ -162,3 +162,5 @@ require (
 )
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
+
+replace buf.build/gen/go/cosmos/cosmos-proto/protocolbuffers/go/cosmos_proto => github.com/cosmos/cosmos-proto v1.0.0-alpha7
