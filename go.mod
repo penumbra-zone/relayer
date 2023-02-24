@@ -3,7 +3,7 @@ module github.com/cosmos/relayer/v2
 go 1.18
 
 require (
-	buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go v1.28.1-20230113211042-4070f18acf80.4
+	buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go v1.28.1-20230222231556-84109b1a3f00.4
 	github.com/avast/retry-go/v4 v4.3.1
 	github.com/confio/ics23/go v0.7.0
 	github.com/cosmos/cosmos-sdk v0.46.6
@@ -28,6 +28,10 @@ require (
 )
 
 require (
+	buf.build/gen/go/cosmos/cosmos-proto/protocolbuffers/go v1.28.1-20211202220400-1935555c206d.4 // indirect
+	buf.build/gen/go/cosmos/cosmos-sdk/protocolbuffers/go v1.28.1-20230118132949-8c515ebc07ee.4 // indirect
+	buf.build/gen/go/cosmos/gogo-proto/protocolbuffers/go v1.28.1-20221020125208-34d970b699f8.4 // indirect
+	buf.build/gen/go/cosmos/ibc/protocolbuffers/go v1.28.1-20230221084850-d397bc4bfd09.4 // indirect
 	buf.build/gen/go/penumbra-zone/ibc-go-vendor/protocolbuffers/go v1.28.1-20221217204905-341b9507648a.4 // indirect
 	cloud.google.com/go v0.104.0 // indirect
 	cloud.google.com/go/compute v1.12.1 // indirect
