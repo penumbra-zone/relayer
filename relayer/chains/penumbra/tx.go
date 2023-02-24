@@ -22,9 +22,9 @@ import (
 	"github.com/cosmos/relayer/v2/relayer/chains/cosmos"
 	"github.com/cosmos/relayer/v2/relayer/provider"
 
-	penumbra_crypto "buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go/penumbra/core/crypto/v1alpha1"
-	penumbra_ibc_types "buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go/penumbra/core/ibc/v1alpha1"
-	penumbra_types "buf.build/gen/go/penumbra-zone/penumbra/protocolbuffers/go/penumbra/core/transaction/v1alpha1"
+	penumbra_crypto "github.com/penumbra-zone/penumbra/proto/go/gen/penumbra/core/crypto/v1alpha1"
+	penumbra_ibc_types "github.com/penumbra-zone/penumbra/proto/go/gen/penumbra/core/ibc/v1alpha1"
+	penumbra_types "github.com/penumbra-zone/penumbra/proto/go/gen/penumbra/core/transaction/v1alpha1"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/bytes"
 	"github.com/tendermint/tendermint/light"
