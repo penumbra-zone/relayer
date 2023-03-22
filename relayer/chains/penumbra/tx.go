@@ -2,6 +2,7 @@ package penumbra
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"regexp"
@@ -256,16 +257,27 @@ func (cc *PenumbraProvider) getAnchor(ctx context.Context) (*penumbracrypto.Merk
 func parseEventsFromABCIResponse(resp abci.ResponseDeliverTx) []provider.RelayerEvent {
 	var events []provider.RelayerEvent
 
+	fmt.Printf("tx.go events: %+v\n", resp.Events)
 	for _, event := range resp.Events {
 		attributes := make(map[string]string)
 		for _, attribute := range event.Attributes {
-			attributes[string(attribute.Key)] = string(attribute.Value)
+			// The key and value are base64-encoded strings, so we first have to decode them:
+			key, err := base64.StdEncoding.DecodeString(string(attribute.Key))
+			if err != nil {
+				continue
+			}
+			value, err := base64.StdEncoding.DecodeString(string(attribute.Value))
+			if err != nil {
+				continue
+			}
+			attributes[string(key)] = string(value)
 		}
 		events = append(events, provider.RelayerEvent{
 			EventType:  event.Type,
 			Attributes: attributes,
 		})
 	}
+	fmt.Printf("parsed events: %+v\n", events)
 	return events
 
 }
@@ -323,7 +335,7 @@ func (cc *PenumbraProvider) SendMessages(ctx context.Context, msgs []provider.Re
 		if err != nil {
 			return nil, false, err
 		}
-		cc.log.Info("waiting for penumbra tx to commit")
+		cc.log.Info("waiting for penumbra tx to commit", zap.String("syncRes", fmt.Sprintf("%+v", syncRes)))
 
 		if err := retry.Do(func() error {
 			ctx, cancel := context.WithTimeout(ctx, 40*time.Second)
@@ -333,6 +345,7 @@ func (cc *PenumbraProvider) SendMessages(ctx context.Context, msgs []provider.Re
 			if err != nil {
 				return err
 			}
+			cc.log.Info("got penumbra tx result", zap.String("res", fmt.Sprintf("%+v", res)))
 
 			height = res.Height
 			txhash = syncRes.Hash.String()
