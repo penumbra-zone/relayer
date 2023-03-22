@@ -28,6 +28,7 @@ func (c *Chain) CreateOpenChannels(
 	if err := ValidateConnectionPaths(c, dst); err != nil {
 		return err
 	}
+	fmt.Println("HERE")
 
 	// port identifiers and channel ORDER must be valid
 	if err := ValidateChannelParams(srcPortID, dstPortID, order); err != nil {
