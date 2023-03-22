@@ -292,7 +292,7 @@ func (cc *PenumbraProvider) sendMessagesInner(ctx context.Context, msgs []provid
 	// will have a signing protocol for this.
 
 	txBody := penumbratypes.TransactionBody{
-		Actions: make([]*penumbratypes.Action, 1),
+		Actions: make([]*penumbratypes.Action, 0),
 		Fee:     &penumbracrypto.Fee{Amount: &penumbracrypto.Amount{Lo: 0, Hi: 0}},
 	}
 	cc.log.Info("got here 1")
