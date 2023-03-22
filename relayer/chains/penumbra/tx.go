@@ -301,69 +301,67 @@ func (cc *PenumbraProvider) SendMessages(ctx context.Context, msgs []provider.Re
 	// are no fees required on the testnet. future versions of penumbra
 	// will have a signing protocol for this.
 
-	// NOTE: currently we have to build 1 TX per action,
-	// due to how the penumbra state machine is
-	// constructed.
+	txBody := penumbratypes.TransactionBody{
+		Actions: make([]*penumbratypes.Action, 1),
+		Fee:     &penumbracrypto.Fee{Amount: &penumbracrypto.Amount{Lo: 0, Hi: 0}},
+	}
+
 	for _, msg := range PenumbraMsgs(msgs...) {
-		txBody := penumbratypes.TransactionBody{
-			Actions: make([]*penumbratypes.Action, 1),
-			Fee:     &penumbracrypto.Fee{Amount: &penumbracrypto.Amount{Lo: 0, Hi: 0}},
-		}
 		action, err := msgToPenumbraAction(msg)
 		if err != nil {
 			return nil, false, err
 		}
-		txBody.Actions[0] = action
+		txBody.Actions = append(txBody.Actions, action)
+	}
 
-		anchor, err := cc.getAnchor(ctx)
+	anchor, err := cc.getAnchor(ctx)
+	if err != nil {
+		return nil, false, err
+	}
+
+	tx := &penumbratypes.Transaction{
+		Body:       &txBody,
+		BindingSig: make([]byte, 64), // use the Cool Signature
+		Anchor:     anchor,
+	}
+
+	txBytes, err := cosmosproto.Marshal(tx)
+	if err != nil {
+		return nil, false, err
+	}
+
+	syncRes, err := cc.RPCClient.BroadcastTxSync(ctx, txBytes)
+	if err != nil {
+		return nil, false, err
+	}
+	cc.log.Info("waiting for penumbra tx to commit", zap.String("syncRes", fmt.Sprintf("%+v", syncRes)))
+
+	if err := retry.Do(func() error {
+		ctx, cancel := context.WithTimeout(ctx, 40*time.Second)
+		defer cancel()
+
+		res, err := cc.RPCClient.Tx(ctx, syncRes.Hash, false)
 		if err != nil {
-			return nil, false, err
+			return err
 		}
+		cc.log.Info("got penumbra tx result", zap.String("res", fmt.Sprintf("%+v", res)))
 
-		tx := &penumbratypes.Transaction{
-			Body:       &txBody,
-			BindingSig: make([]byte, 64), // use the Cool Signature
-			Anchor:     anchor,
-		}
+		height = res.Height
+		txhash = syncRes.Hash.String()
+		code = res.TxResult.Code
 
-		txBytes, err := cosmosproto.Marshal(tx)
-		if err != nil {
-			return nil, false, err
-		}
-
-		syncRes, err := cc.RPCClient.BroadcastTxSync(ctx, txBytes)
-		if err != nil {
-			return nil, false, err
-		}
-		cc.log.Info("waiting for penumbra tx to commit", zap.String("syncRes", fmt.Sprintf("%+v", syncRes)))
-
-		if err := retry.Do(func() error {
-			ctx, cancel := context.WithTimeout(ctx, 40*time.Second)
-			defer cancel()
-
-			res, err := cc.RPCClient.Tx(ctx, syncRes.Hash, false)
-			if err != nil {
-				return err
-			}
-			cc.log.Info("got penumbra tx result", zap.String("res", fmt.Sprintf("%+v", res)))
-
-			height = res.Height
-			txhash = syncRes.Hash.String()
-			code = res.TxResult.Code
-
-			events = append(events, parseEventsFromABCIResponse(res.TxResult)...)
-			return nil
-		}, retry.Context(ctx), rtyAtt, rtyDel, rtyErr, retry.OnRetry(func(n uint, err error) {
-			cc.log.Info(
-				"Error building or broadcasting transaction",
-				zap.String("chain_id", cc.PCfg.ChainID),
-				zap.Uint("attempt", n+1),
-				zap.Uint("max_attempts", rtyAttNum),
-				zap.Error(err),
-			)
-		})); err != nil {
-			return nil, false, err
-		}
+		events = append(events, parseEventsFromABCIResponse(res.TxResult)...)
+		return nil
+	}, retry.Context(ctx), rtyAtt, rtyDel, rtyErr, retry.OnRetry(func(n uint, err error) {
+		cc.log.Info(
+			"Error building or broadcasting transaction",
+			zap.String("chain_id", cc.PCfg.ChainID),
+			zap.Uint("attempt", n+1),
+			zap.Uint("max_attempts", rtyAttNum),
+			zap.Error(err),
+		)
+	})); err != nil {
+		return nil, false, err
 	}
 
 	rlyResp := &provider.RelayerTxResponse{
