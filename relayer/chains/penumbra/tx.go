@@ -2259,6 +2259,6 @@ func (cc *PenumbraProvider) MsgSubmitQueryResponse(chainID string, queryID provi
 }
 
 func (cc *PenumbraProvider) SendMessagesToMempool(ctx context.Context, msgs []provider.RelayerMessage, memo string, asyncCtx context.Context, asyncCallback func(*provider.RelayerTxResponse, error)) error {
-	//TODO implement me
-	panic("implement me")
+	go cc.SendMessages(ctx, msgs, memo)
+	return nil
 }
