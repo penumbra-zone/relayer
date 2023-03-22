@@ -282,6 +282,52 @@ func parseEventsFromABCIResponse(resp abci.ResponseDeliverTx) []provider.Relayer
 
 }
 
+func (cc *PenumbraProvider) sendMessagesInner(ctx context.Context, msgs []provider.RelayerMessage, _memo string) (*coretypes.ResultBroadcastTx, error) {
+	cc.log.Info("sending messages", zap.String("msgs", fmt.Sprintf("%+v", msgs)))
+	cc.log.Info("got here 0")
+
+	// TODO: fee estimation, fee payments
+	// NOTE: we do not actually need to sign this tx currently, since there
+	// are no fees required on the testnet. future versions of penumbra
+	// will have a signing protocol for this.
+
+	txBody := penumbratypes.TransactionBody{
+		Actions: make([]*penumbratypes.Action, 1),
+		Fee:     &penumbracrypto.Fee{Amount: &penumbracrypto.Amount{Lo: 0, Hi: 0}},
+	}
+	cc.log.Info("got here 1")
+
+	for _, msg := range PenumbraMsgs(msgs...) {
+		action, err := msgToPenumbraAction(msg)
+		if err != nil {
+			return nil, err
+		}
+		txBody.Actions = append(txBody.Actions, action)
+	}
+	cc.log.Info("got here 2")
+
+	anchor, err := cc.getAnchor(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tx := &penumbratypes.Transaction{
+		Body:       &txBody,
+		BindingSig: make([]byte, 64), // use the Cool Signature
+		Anchor:     anchor,
+	}
+	cc.log.Info("got here 3")
+
+	cc.log.Info("broadcasting penumbra tx", zap.String("tx", fmt.Sprintf("%+v", tx)))
+	txBytes, err := cosmosproto.Marshal(tx)
+	if err != nil {
+		return nil, err
+	}
+	cc.log.Info("got here 4")
+
+	return cc.RPCClient.BroadcastTxSync(ctx, txBytes)
+}
+
 // SendMessages attempts to sign, encode, & send a slice of RelayerMessages
 // This is used extensively in the relayer as an extension of the Provider interface
 //
@@ -296,41 +342,7 @@ func (cc *PenumbraProvider) SendMessages(ctx context.Context, msgs []provider.Re
 	var txhash string
 	var code uint32
 
-	// TODO: fee estimation, fee payments
-	// NOTE: we do not actually need to sign this tx currently, since there
-	// are no fees required on the testnet. future versions of penumbra
-	// will have a signing protocol for this.
-
-	txBody := penumbratypes.TransactionBody{
-		Actions: make([]*penumbratypes.Action, 1),
-		Fee:     &penumbracrypto.Fee{Amount: &penumbracrypto.Amount{Lo: 0, Hi: 0}},
-	}
-
-	for _, msg := range PenumbraMsgs(msgs...) {
-		action, err := msgToPenumbraAction(msg)
-		if err != nil {
-			return nil, false, err
-		}
-		txBody.Actions = append(txBody.Actions, action)
-	}
-
-	anchor, err := cc.getAnchor(ctx)
-	if err != nil {
-		return nil, false, err
-	}
-
-	tx := &penumbratypes.Transaction{
-		Body:       &txBody,
-		BindingSig: make([]byte, 64), // use the Cool Signature
-		Anchor:     anchor,
-	}
-
-	txBytes, err := cosmosproto.Marshal(tx)
-	if err != nil {
-		return nil, false, err
-	}
-
-	syncRes, err := cc.RPCClient.BroadcastTxSync(ctx, txBytes)
+	syncRes, err := cc.sendMessagesInner(ctx, msgs, _memo)
 	if err != nil {
 		return nil, false, err
 	}
@@ -2259,6 +2271,7 @@ func (cc *PenumbraProvider) MsgSubmitQueryResponse(chainID string, queryID provi
 }
 
 func (cc *PenumbraProvider) SendMessagesToMempool(ctx context.Context, msgs []provider.RelayerMessage, memo string, asyncCtx context.Context, asyncCallback func(*provider.RelayerTxResponse, error)) error {
-	go cc.SendMessages(ctx, msgs, memo)
-	return nil
+	fmt.Printf("sending messages to mempool: %+v\n", msgs)
+	_, err := cc.sendMessagesInner(ctx, msgs, memo)
+	return err
 }
