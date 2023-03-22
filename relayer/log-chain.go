@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cosmos/relayer/v2/relayer/chains/cosmos"
+	"github.com/cosmos/relayer/v2/relayer/chains/penumbra"
 	"github.com/cosmos/relayer/v2/relayer/provider"
 	"go.uber.org/zap"
 
@@ -21,7 +22,13 @@ func logFailedTx(log *zap.Logger, chainID string, res *provider.RelayerTxRespons
 				fmt.Sprintf("msg-%d", i),
 				m,
 			)
+		case penumbra.PenumbraMessage:
+			fields[i+1] = zap.Object(
+				fmt.Sprintf("msg-%d", i),
+				m,
+			)
 		default:
+			log.Warn("Found an unknown message type for failed transaction")
 			fields[i+1] = zap.Skip()
 		}
 	}
