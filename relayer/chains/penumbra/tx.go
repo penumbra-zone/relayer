@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
@@ -239,16 +240,45 @@ type ValidatorUpdate struct {
 }
 
 func (cc *PenumbraProvider) getAnchor(ctx context.Context) (*penumbracrypto.MerkleRoot, error) {
+	status, err := cc.RPCClient.Status(ctx)
+	if err != nil {
+		return nil, err
+	}
+	maxHeight := status.SyncInfo.LatestBlockHeight
+
+	// Generate a random block height to query between 1 and maxHeight
+	height := rand.Int63n(maxHeight-1) + 1
+
+	path := fmt.Sprintf("shielded_pool/anchor/%d", height)
+
+	fmt.Printf("path: %s maxHeight %d\n", path, maxHeight)
 	req := abci.RequestQuery{
 		Path:   "state/key",
-		Height: 1,
-		Data:   []byte("shielded_pool/anchor/1"),
+		Height: maxHeight,
+		Data:   []byte(path),
 		Prove:  false,
 	}
+	fmt.Printf("requesting anchor %+v\n", req)
 
 	res, err := cc.QueryABCI(ctx, req)
 	if err != nil {
-		return nil, err
+		fmt.Printf("error querying abci, retrying with alternate path")
+		path := fmt.Sprintf("sct/anchor/%d", height)
+
+		fmt.Printf("path: %s maxHeight %d\n", path, maxHeight)
+		req := abci.RequestQuery{
+			Path:   "state/key",
+			Height: maxHeight,
+			Data:   []byte(path),
+			Prove:  false,
+		}
+		fmt.Printf("requesting anchor %+v\n", req)
+		res, err := cc.QueryABCI(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+
+		return &penumbracrypto.MerkleRoot{Inner: res.Value[2:]}, nil
 	}
 
 	return &penumbracrypto.MerkleRoot{Inner: res.Value[2:]}, nil
