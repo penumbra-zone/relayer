@@ -313,7 +313,6 @@ func parseEventsFromABCIResponse(resp abci.ResponseDeliverTx) []provider.Relayer
 }
 
 func (cc *PenumbraProvider) sendMessagesInner(ctx context.Context, msgs []provider.RelayerMessage, _memo string) (*coretypes.ResultBroadcastTx, error) {
-	cc.log.Info("sending messages", zap.String("msgs", fmt.Sprintf("%+v", msgs)))
 	cc.log.Info("got here 0")
 
 	// TODO: fee estimation, fee payments
@@ -348,7 +347,7 @@ func (cc *PenumbraProvider) sendMessagesInner(ctx context.Context, msgs []provid
 	}
 	cc.log.Info("got here 3")
 
-	cc.log.Info("broadcasting penumbra tx", zap.String("tx", fmt.Sprintf("%+v", tx)))
+	cc.log.Info("broadcasting penumbra tx")
 	txBytes, err := cosmosproto.Marshal(tx)
 	if err != nil {
 		return nil, err
@@ -2301,7 +2300,7 @@ func (cc *PenumbraProvider) MsgSubmitQueryResponse(chainID string, queryID provi
 }
 
 func (cc *PenumbraProvider) SendMessagesToMempool(ctx context.Context, msgs []provider.RelayerMessage, memo string, asyncCtx context.Context, asyncCallback func(*provider.RelayerTxResponse, error)) error {
-	fmt.Printf("sending messages to mempool: %+v\n", msgs)
-	_, err := cc.sendMessagesInner(ctx, msgs, memo)
+	sendRsp, err := cc.sendMessagesInner(ctx, msgs, memo)
+	cc.log.Info("send messages response", zap.Any("response", sendRsp), zap.Error(err))
 	return err
 }
