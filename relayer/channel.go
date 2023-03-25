@@ -23,12 +23,10 @@ func (c *Chain) CreateOpenChannels(
 	memo string,
 	pathName string,
 ) error {
-	fmt.Println("CREATING CHANNELS")
 	// client and connection identifiers must be filled in
 	if err := ValidateConnectionPaths(c, dst); err != nil {
 		return err
 	}
-	fmt.Println("HERE")
 
 	// port identifiers and channel ORDER must be valid
 	if err := ValidateChannelParams(srcPortID, dstPortID, order); err != nil {

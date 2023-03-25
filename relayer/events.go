@@ -43,7 +43,6 @@ func ParseConnectionIDFromEvents(events []provider.RelayerEvent) (string, error)
 // ParseChannelIDFromEvents parses events emitted from a MsgChannelOpenInit or
 // MsgChannelOpenTry and returns the channel identifier.
 func ParseChannelIDFromEvents(events []provider.RelayerEvent) (string, error) {
-	fmt.Println("EVENTS: ", events)
 	for _, event := range events {
 		if event.EventType == channeltypes.EventTypeChannelOpenInit || event.EventType == channeltypes.EventTypeChannelOpenTry {
 			for attributeKey, attributeValue := range event.Attributes {

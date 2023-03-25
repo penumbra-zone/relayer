@@ -251,28 +251,23 @@ func (cc *PenumbraProvider) getAnchor(ctx context.Context) (*penumbracrypto.Merk
 
 	path := fmt.Sprintf("shielded_pool/anchor/%d", height)
 
-	fmt.Printf("path: %s maxHeight %d\n", path, maxHeight)
 	req := abci.RequestQuery{
 		Path:   "state/key",
 		Height: maxHeight,
 		Data:   []byte(path),
 		Prove:  false,
 	}
-	fmt.Printf("requesting anchor %+v\n", req)
 
 	res, err := cc.QueryABCI(ctx, req)
 	if err != nil {
-		fmt.Printf("error querying abci, retrying with alternate path")
 		path := fmt.Sprintf("sct/anchor/%d", height)
 
-		fmt.Printf("path: %s maxHeight %d\n", path, maxHeight)
 		req := abci.RequestQuery{
 			Path:   "state/key",
 			Height: maxHeight,
 			Data:   []byte(path),
 			Prove:  false,
 		}
-		fmt.Printf("requesting anchor %+v\n", req)
 		res, err := cc.QueryABCI(ctx, req)
 		if err != nil {
 			return nil, err
@@ -313,7 +308,6 @@ func parseEventsFromABCIResponse(resp abci.ResponseDeliverTx) []provider.Relayer
 }
 
 func (cc *PenumbraProvider) sendMessagesInner(ctx context.Context, msgs []provider.RelayerMessage, _memo string) (*coretypes.ResultBroadcastTx, error) {
-	cc.log.Info("got here 0")
 
 	// TODO: fee estimation, fee payments
 	// NOTE: we do not actually need to sign this tx currently, since there
@@ -324,7 +318,6 @@ func (cc *PenumbraProvider) sendMessagesInner(ctx context.Context, msgs []provid
 		Actions: make([]*penumbratypes.Action, 0),
 		Fee:     &penumbracrypto.Fee{Amount: &penumbracrypto.Amount{Lo: 0, Hi: 0}},
 	}
-	cc.log.Info("got here 1")
 
 	for _, msg := range PenumbraMsgs(msgs...) {
 		action, err := msgToPenumbraAction(msg)
@@ -333,7 +326,6 @@ func (cc *PenumbraProvider) sendMessagesInner(ctx context.Context, msgs []provid
 		}
 		txBody.Actions = append(txBody.Actions, action)
 	}
-	cc.log.Info("got here 2")
 
 	anchor, err := cc.getAnchor(ctx)
 	if err != nil {
@@ -345,14 +337,12 @@ func (cc *PenumbraProvider) sendMessagesInner(ctx context.Context, msgs []provid
 		BindingSig: make([]byte, 64), // use the Cool Signature
 		Anchor:     anchor,
 	}
-	cc.log.Info("got here 3")
 
 	cc.log.Info("broadcasting penumbra tx")
 	txBytes, err := cosmosproto.Marshal(tx)
 	if err != nil {
 		return nil, err
 	}
-	cc.log.Info("got here 4")
 
 	return cc.RPCClient.BroadcastTxSync(ctx, txBytes)
 }
@@ -477,7 +467,6 @@ func (cc *PenumbraProvider) SubmitMisbehavior( /*TBD*/ ) (provider.RelayerMessag
 }
 
 func (cc *PenumbraProvider) MsgUpdateClient(srcClientId string, dstHeader ibcexported.ClientMessage) (provider.RelayerMessage, error) {
-	fmt.Println("PENUMBRA update client")
 	acc, err := cc.Address()
 	if err != nil {
 		return nil, err
@@ -547,7 +536,6 @@ func (cc *PenumbraProvider) ConnectionOpenInit(srcClientId, dstClientId string, 
 }
 
 func (cc *PenumbraProvider) ConnectionOpenTry(ctx context.Context, dstQueryProvider provider.QueryProvider, dstHeader ibcexported.ClientMessage, dstPrefix commitmenttypes.MerklePrefix, srcClientId, dstClientId, srcConnId, dstConnId string) ([]provider.RelayerMessage, error) {
-	fmt.Println("CONN OPEN TRY")
 	var (
 		acc string
 		err error
@@ -632,6 +620,7 @@ func (cc *PenumbraProvider) ConnectionOpenAck(ctx context.Context, dstQueryProvi
 	if err != nil {
 		return nil, err
 	}
+	cc.log.Info("ConnectionOpenAck", zap.String("updateMsg", fmt.Sprintf("%+v", updateMsg)), zap.Any("proofHeight", proofHeight))
 
 	if acc, err = cc.Address(); err != nil {
 		return nil, err

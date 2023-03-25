@@ -178,7 +178,7 @@ func (cc *PenumbraProvider) QueryTendermintProof(ctx context.Context, height int
 		height, _ = cc.QueryLatestHeight(ctx)
 	}
 
-	fmt.Println("querying at height:", height, "with key:", string(key))
+	cc.log.Debug("Querying K/V", zap.String("ChainId", cc.ChainId()), zap.Int64("Height", height), zap.String("Key", string(key)))
 	req := abci.RequestQuery{
 		Path:   "state/key",
 		Height: height,
@@ -227,6 +227,7 @@ func (cc *PenumbraProvider) QueryClientStateResponse(ctx context.Context, height
 	if err != nil {
 		return nil, err
 	}
+	cc.log.Debug("QueryClientStateResponse", zap.Int64("Height", height), zap.Any("proofHeight", proofHeight), zap.String("Key", string(key)), zap.Any("ClientState", clientState))
 
 	anyClientState, err := clienttypes.PackClientState(clientState)
 	if err != nil {
@@ -526,6 +527,7 @@ func (cc *PenumbraProvider) GenerateConnHandshakeProof(ctx context.Context, heig
 	if err := eg.Wait(); err != nil {
 		return nil, nil, nil, nil, clienttypes.Height{}, err
 	}
+	cc.log.Info("GenerateConnHandshakeProof", zap.Int64("height", height), zap.Any("connId", connId), zap.Any("connectionStateRes", connectionStateRes))
 
 	return clientState, clientStateRes.Proof, consensusStateRes.Proof, connectionStateRes.Proof, connectionStateRes.ProofHeight, nil
 }
@@ -577,7 +579,6 @@ func (cc *PenumbraProvider) queryChannelABCI(ctx context.Context, height int64, 
 	if err := cdc.Unmarshal(value, &channel); err != nil {
 		return nil, err
 	}
-	fmt.Println("QUERIED CHANNEL WITH STATE: ", channel.State)
 
 	return &chantypes.QueryChannelResponse{
 		Channel:     &channel,
