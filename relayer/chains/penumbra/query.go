@@ -173,11 +173,6 @@ func (cc *PenumbraProvider) QueryTendermintProof(ctx context.Context, height int
 		height--
 	}
 
-	// TODO: fix this at the query layer?
-	if height == 0 {
-		height, _ = cc.QueryLatestHeight(ctx)
-	}
-
 	cc.log.Debug("Querying K/V", zap.String("ChainId", cc.ChainId()), zap.Int64("Height", height), zap.String("Key", string(key)))
 	req := abci.RequestQuery{
 		Path:   "state/key",
@@ -204,7 +199,7 @@ func (cc *PenumbraProvider) QueryTendermintProof(ctx context.Context, height int
 	}
 
 	revision := clienttypes.ParseChainID(cc.PCfg.ChainID)
-	return res.Value, proofBz, clienttypes.NewHeight(revision, uint64(res.Height)), nil
+	return res.Value, proofBz, clienttypes.NewHeight(revision, uint64(res.Height)+1), nil
 }
 
 // QueryClientStateResponse retrieves the latest consensus state for a client in state at a given height
