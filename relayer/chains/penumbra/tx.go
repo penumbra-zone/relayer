@@ -1354,12 +1354,8 @@ func (cc *PenumbraProvider) MsgConnectionOpenTry(msgOpenInit provider.Connection
 	return cosmos.NewCosmosMessage(msg), nil
 }
 
-var called = 0
 
 func (cc *PenumbraProvider) MsgConnectionOpenAck(msgOpenTry provider.ConnectionInfo, proof provider.ConnectionProof) (provider.RelayerMessage, error) {
-	if called != 0 {
-		panic("DUPLICATE CALL")
-	}
 	signer, err := cc.Address()
 	if err != nil {
 		return nil, err
@@ -1385,8 +1381,6 @@ func (cc *PenumbraProvider) MsgConnectionOpenAck(msgOpenTry provider.ConnectionI
 		ConsensusHeight: proof.ClientState.GetLatestHeight().(clienttypes.Height),
 		Signer:          signer,
 	}
-
-	called++
 
 	return cosmos.NewCosmosMessage(msg), nil
 }
